@@ -95,43 +95,60 @@ let form = $("form");
         let calMonth = $('span#calMonth').text();
         let calDate = $('td.choiceDay').text();
         let timeRadio = $('input[type="radio"][name="time"]');
+        let criteriaInput = $('input[type="radio"][name="time"][value="2330"]');
+        let todayTargetInputs = criteriaInput.parent().parent().prevAll().addBack().find('input');
+        let tomorrowTargetInputs  = criteriaInput.parent().parent().nextAll().find('input');
         let restaurantSeq = $('.restaurantSeqData').data("restaurant-seq");
         if (calDate === $(this).text()) {
             let selectedDate = calYear+"-"+calMonth+"-"+calDate;
-            timeRadio.removeClass('notOpen');
-            timeRadio.removeClass('outdated');
-            timeRadio.removeClass('booked');
-            timeRadio.prop("disabled", false);
-            $.ajax({
-                type: "POST",
-                url: "/api/restaurants/getTimeStatuses/" + restaurantSeq +  "/" + selectedDate,
-                success: function(timeStatuses) {
-                    for (let key in timeStatuses) {
-                        if (timeStatuses.hasOwnProperty(key)) { // 객체 자체의 속성인지 확인합니다.
-                            let timeStatus = timeStatuses[key];
-                            let $matchingRadio = timeRadio.filter('[value="' + key + '"]');
-                            if ($matchingRadio.length > 0) {
-                                if (timeStatus !== 0){
-                                    if (timeStatus === 3) {
-                                        $matchingRadio.addClass('notOpen');
-                                    } else if (timeStatus === 2) {
-                                        $matchingRadio.addClass('outdated');
-                                    } else if (timeStatus === 1) {
-                                        $matchingRadio.addClass('booked');
-                                    }
-                                    $matchingRadio.prop("checked", false);
-                                    $matchingRadio.prop("disabled", true);
+            if(todayTargetInputs.length !== 0){
+                 matchWithAjaxStatus(selectedDate, restaurantSeq, timeRadio, todayTargetInputs);
+            }
+            if(tomorrowTargetInputs.length !== 0){
+                let currentDate = new Date(selectedDate);
+                let nextDate = new Date(currentDate.getTime() + 24 * 60 * 60 * 1000);
+                let nextDateString = nextDate.toISOString().slice(0,10);
+                matchWithAjaxStatus(nextDateString, restaurantSeq, timeRadio, tomorrowTargetInputs);
+            }
+
+        }
+
+    })
+    function matchWithAjaxStatus(selectedDate, restaurantSeq, timeRadio,targetInputs) {
+        timeRadio.removeClass('notOpen');
+        timeRadio.removeClass('outdated');
+        timeRadio.removeClass('booked');
+        timeRadio.prop("disabled", false);
+        $.ajax({
+            type: "POST",
+            url: "/api/restaurants/getTimeStatuses/" + restaurantSeq +  "/" + selectedDate,
+            success: function(timeStatuses) {
+                for (let key in timeStatuses) {
+                    if (timeStatuses.hasOwnProperty(key)) {
+                        let timeStatus = timeStatuses[key];
+                        let $matchingRadio = targetInputs.filter('[value="' + key + '"]');
+                        if ($matchingRadio.length > 0) {
+                            if (timeStatus !== 0){
+                                if (timeStatus === 3) {
+                                    $matchingRadio.addClass('notOpen');
+                                } else if (timeStatus === 2) {
+                                    $matchingRadio.addClass('outdated');
+                                } else if (timeStatus === 1) {
+                                    $matchingRadio.addClass('booked');
                                 }
+                                $matchingRadio.prop("checked", false);
+                                $matchingRadio.prop("disabled", true);
                             }
                         }
                     }
-                },
-                error: function(xhr, status, error) {
-                    console.error(xhr.responseText);
                 }
-            });
-        }
-    })
+            },
+            error: function(xhr, status, error) {
+                console.error(xhr.responseText);
+            }
+        });
+    }
+
     reservationBtn.click(function () {
         //modal 값 정보
         let calYear = $('span#calYear').text();

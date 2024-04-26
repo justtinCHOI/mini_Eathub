@@ -8,7 +8,6 @@
         <link rel="stylesheet" href="../../resources/css/search-common.css" th:href="@{/css/search-common.css}" />
         <link rel="stylesheet" href="../../resources/css/footer.css" th:href="@{/css/footer.css}" />
 
-        <!-- <link rel="stylesheet" href="../../resources/css/memberMypage.css" th:href="@{/css/memberMypage.css}"> -->
         <link  rel="stylesheet" href="../../resources/css/search-main.css" th:href="@{/css/search-main.css}" />
         <link  rel="stylesheet" href="../../resources/css/search-modal.css" th:href="@{/css/search-modal.css}" />
 
@@ -17,7 +16,8 @@
         <!-- Swiper JS -->
         <script defer src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
 
-        <script defer src="../../resources/js/zzim.js" th:src="@{/js/zzim.js}"></script>
+        <script defer type="text/javascript" src="../../resources/js/zzim.js" th:src="@{/js/zzim.js}"></script>
+        <script defer type="text/javascript" src="../../resources/js/search-sort.js" th:src="@{/js/search-sort.js}"></script>
         <script defer type="text/javascript" src="../../resources/js/search-main.js" th:src="@{/js/search-main.js}"></script>
         <script defer type="text/javascript" src="../../resources/js/search-modal.js" th:src="@{/js/search-modal.js}"></script>
     </head>
@@ -29,6 +29,7 @@
                         <div class="header-left">
                             <button class="btn-back">이전</button>
                             <h1 class="page-title">검색결과&emsp;</h1>
+
                         </div>
                     </div>
                 </header>
@@ -41,13 +42,15 @@
                                 <span class="person"></span>
                                 <input class="date" type="hidden" name="date" th:value="${session.wantingDate}"/>
                                 <input class="hour" type="hidden" name="hour" th:value="${session.wantingHour}"/>
-                                <input class="person" type="hidden" name="person"  th:value="${session.wantingPerson}"/>
+                                <input class="person" type="hidden" name="person" th:value="${session.wantingPerson}"/>
+                                <input class="categorySeq" type="hidden" th:value="${categoryDTO.category_seq}">
+
                             </a>
                         </div>
                     </div>
                     <hr class="separator" />
                     <div id="search-result-header" class="_54rkq60">
-                        <div class="_54rkq62"><strong th:text="${#lists.size(restaurantList)}">0</strong>개의 매장</div>
+                        <div class="_54rkq62" style="visibility: hidden"><strong>0</strong>개의 매장</div>
                         <div class="_10fm75h2">
                             <button class="_54rkq61">
                                 <img
@@ -56,7 +59,7 @@
                                     alt=""
                                     style="background: center center no-repeat transparent"
                                 />
-                                <span class="__label">추천순</span>
+                                <span class="__label">찜순</span>
                                 <img
                                         src="../../resources/images/arrow-down.svg"
                                         th:src="@{/images/arrow-down.svg}"
@@ -67,7 +70,7 @@
                             </button>
                             <div class="_1cjtq760 _1ltqxco1o _54rkq63">
                                 <label class="nakw3z1">
-                                    <input type="radio" name="sort_by" class="nakw3z2" checked="" />
+                                    <input type="radio" name="sort_by" class="nakw3z2" />
                                     <span class="nakw3z3">찜순</span>
                                 </label>
                                 <label class="nakw3z1">
@@ -78,14 +81,14 @@
                                     <input type="radio" name="sort_by" class="nakw3z2" />
                                     <span class="nakw3z3">리뷰 많은순</span>
                                 </label>
-                                <label class="nakw3z1">
-                                    <input type="radio" name="sort_by" class="nakw3z2" />
-                                    <span class="nakw3z3">가격 높은순</span>
-                                </label>
-                                <label class="nakw3z1">
-                                    <input type="radio" name="sort_by" class="nakw3z2" />
-                                    <span class="nakw3z3">가격 낮은순</span>
-                                </label>
+<!--                                <label class="nakw3z1">-->
+<!--                                    <input type="radio" name="sort_by" class="nakw3z2" />-->
+<!--                                    <span class="nakw3z3">가격 높은순</span>-->
+<!--                                </label>-->
+<!--                                <label class="nakw3z1">-->
+<!--                                    <input type="radio" name="sort_by" class="nakw3z2" />-->
+<!--                                    <span class="nakw3z3">가격 낮은순</span>-->
+<!--                                </label>-->
 <!--                                <label class="nakw3z1">-->
 <!--                                    <input type="radio" name="sort_by" class="nakw3z2" />-->
 <!--                                    <span class="nakw3z3">거리순</span>-->
@@ -98,82 +101,10 @@
                             <div class="saved-restaurant-list">
                                 <div style="padding-bottom: 10px">
                                     <div id="pickup_search_list">
-                                        <div data-dummy="" th:each="restaurant : ${restaurantList}">
-                                            <div class="saved-restaurant-list-item">
-                                                <div class="restaurant-info">
-                                                    <div class="tb">
-                                                        <a th:href="@{|/restaurant/detail/${restaurant.restaurant_seq}|}">
-                                                            <img
-                                                                class="img"
-                                                                src="../../resources/images/mongtanjeju.jpg"
-                                                                th:src="|https://kr.object.ncloudstorage.com/bitcamp-6th-bucket-97/storage/${restaurant.image_url}|"/>
-                                                        </a>
-                                                    </div>
-                                                    <div class="detail">
-                                                        <div class="detail-header">
-                                                            <div class="txt">
-                                                                <a th:href="@{|/restaurant/detail/${restaurant.restaurant_seq}|}">
-                                                                    <h4 class="name" th:text="${restaurant.restaurant_name}">MAISON HANNAM</h4>
-                                                                    <p class="excerpt" th:text="${restaurant.description}">
-                                                                        유엔빌리지 대저택, 이태리 대사관저를 리모델링한 <br />한강뷰 멋진 온실 테라스
-                                                                        레스토랑
-                                                                    </p>
-                                                                </a>
-                                                            </div>
-                                                            <a
-                                                                class="btn-bookmark"
-                                                                th:classappend="${restaurant.isZzimed} ? 'active' : ''"
-                                                                th:text="${restaurant.isZzimed}"
-                                                                th:data-restaurant-seq="${restaurant.restaurant_seq}"
-                                                                >북마크</a
-                                                            >
-                                                        </div>
-                                                        <a th:href="@{|/restaurant/detail/${restaurant.restaurant_seq}|}">
-                                                            <div class="restaurant-meta">
-                                                                <div class="_1xnbt310 _1xnbt311">
-                                                                    <div class="_1xnbt313">
-                                                                        <img
-                                                                            class="_1xnbt314"
-                                                                            width="16"
-                                                                            height="16"
-                                                                            src="../../resources/images/star-yellow.svg"
-                                                                            th:src="@{/images/star-yellow.svg}"
-                                                                        />
-                                                                        <span class="_1xnbt316 _1ltqxco1d" th:text="${restaurant.rating}">4.3</span>
-                                                                        <span class="_1xnbt317 _1ltqxco1g" th:text="${restaurant.review_total}"
-                                                                            >(1,469)</span
-                                                                        >
-                                                                    </div>
-                                                                </div>
-                                                                <div class="tag-wrapper">
-                                                                    <div>
-                                                                        <span class="tags" th:text="${restaurant.tag}">태그내용</span>
-                                                                        <span
-                                                                            class="price"
-                                                                            th:text="|영업시간 ${#dates.format(restaurant.openHour,'HH:mm')}~${#dates.format(restaurant.closeHour,'HH:mm')}|"
-                                                                            >영업시간</span
-                                                                        >
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </a>
-                                                        <div class="timetable-list timetable-list-sm">
-                                                            <button class="timetable-list-item">
-                                                                <span class="time">오후6:30</span>
-                                                            </button>
-                                                            <button class="timetable-list-item disabled" disabled="">
-                                                                <span class="time">&nbsp;</span>
-                                                            </button>
-                                                            <button class="timetable-list-item">
-                                                                <span class="time">오후7:30</span>
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <hr style="padding-bottom: 50px" />
+
                                     </div>
+                                    <div class="loading-indicator" id="loading">로딩 중...</div>
+                                    <hr style="padding-bottom: 50px" />
                                 </div>
                             </div>
                         </div>
@@ -265,7 +196,6 @@
                 </div>
             </div>
         </div>
-
         <!--/* footer th:fragment="footerFragment" */-->
         <div th:replace="~{template/footer :: footerFragment}"></div>
     </body>

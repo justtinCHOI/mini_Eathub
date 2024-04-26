@@ -108,6 +108,9 @@ function fetchAndAppendReviews() {
 
 window.addEventListener('scroll', () => {
     setTimeout(() => {
+        console.log(" $(window).innerHeight()   : " + window.innerHeight);
+        console.log(" $(window).scrollTop()   : " + window.scrollY);
+        console.log(" $(document).height()   : " + document.body.scrollHeight);
         if (window.innerHeight + window.scrollY >= document.body.scrollHeight - 10 && !isFetching) {
             fetchAndAppendReviews();
         }

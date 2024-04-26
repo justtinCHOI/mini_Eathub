@@ -9,6 +9,7 @@ import com.eathub.entity.RestaurantInfo;
 import com.eathub.service.MemberService;
 import com.eathub.service.RestaurantService;
 import com.eathub.service.ReviewService;
+import com.eathub.service.SearchService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -32,6 +33,7 @@ public class RestaurantController {
     private final RestaurantService restaurantService;
     private final MemberService memberService;
     private final ReviewService reviewService;
+    private final SearchService searchService;
 
     /**
         * 해당 레스토랑의 정보를 가져와서 모델에 추가하고, 레스토랑 상세 정보 페이지로 이동합니다.
@@ -44,6 +46,9 @@ public class RestaurantController {
     @GetMapping("/detail/{restaurant_seq}")
     public String restaurantInfo(@PathVariable Long restaurant_seq,Model model,HttpSession session){
         RestaurantInfo selectRestaurantInfo = restaurantService.selectRestaurantInfo(restaurant_seq);
+        String wantingDate = (String) session.getAttribute("wantingDate");
+        String wantingHour = (String) session.getAttribute("wantingHour");
+
         RestaurantDetailDTO restaurantDetailDTO = restaurantService.getRestaurantDetail(restaurant_seq);
         if(restaurantDetailDTO != null){
             model.addAttribute("restaurantDetailDTO", restaurantDetailDTO);
@@ -54,7 +59,7 @@ public class RestaurantController {
 
         String closedDay = selectRestaurantInfo.getClosedDay();
         reservationJoinDTO.setClosedDayList(memberService.convertStringToList(closedDay));
-     
+
         // 리뷰 사진들 불러오기
         List<PictureDTO> pictureDTOS = restaurantService.selectAllPictures(restaurant_seq);
         // 메뉴 목록 조회
@@ -75,17 +80,15 @@ public class RestaurantController {
         model.addAttribute("menuList", menuList);
 
         // 세션에 값이 없으면 세션 생성
-        if(session.getAttribute("wantingDate") == null){
-            session.setAttribute("wantingDate", restaurantService.getTodayDate());
-        }
-        if(session.getAttribute("wantingHour") == null){
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HHmm");
-            session.setAttribute("wantingHour", restaurantService.getNextReservationTime().format(formatter));
+        if(!searchService.isValidDateFormat(wantingDate)
+                ||  wantingHour == null){
+            String[] Arr = searchService.getDateTime();
+            session.setAttribute("wantingDate", Arr[0]);
+            session.setAttribute("wantingHour", Arr[1]);
         }
         if(session.getAttribute("wantingPerson") == null){
             session.setAttribute("wantingPerson", 1);
         }
-        session.setAttribute("restaurantSeq", restaurant_seq);
         return "/restaurant/restaurantInfo";
     }
 

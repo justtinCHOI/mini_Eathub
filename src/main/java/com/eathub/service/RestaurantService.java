@@ -14,11 +14,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 import java.time.format.DateTimeFormatter;
 
+import java.time.format.DateTimeParseException;
 import java.util.*;
 @Slf4j
 @Service
@@ -346,6 +348,25 @@ public class RestaurantService {
         return sdf.format(date);
     }
 
+    //wantingDate 이 형식에 맞는지 확인
+    public boolean isValidDateFormat(String wantingDate) {
+        if (wantingDate == null || wantingDate.isEmpty()) {
+            // 입력 문자열이 null 또는 빈 문자열인 경우 유효하지 않은 형식으로 간주
+            return false;
+        }
+
+        try {
+            // "yyyy-MM-dd" 형식으로 파싱을 시도하여 LocalDate 객체로 변환
+            LocalDate.parse(wantingDate, DateTimeFormatter.ISO_DATE);
+            // 예외가 발생하지 않았으므로 유효한 형식임을 반환
+            return true;
+        } catch (DateTimeParseException e) {
+            // 예외 발생 시 유효하지 않은 형식으로 간주
+            return false;
+        }
+    }
+
+
     //session 초기값에 저장할 가장 가까운 예약 가능 시간 구하기.
     public LocalTime getNextReservationTime() {
         // 현재 시간 가져오기
@@ -444,5 +465,44 @@ public class RestaurantService {
             }
         }
         return bookedTimes;
+    }
+
+    // 해당일의 요일을 구하는 메소드
+    public static String[] getDayOfWeek(String selectedDate) {
+        // 문자열을 LocalDate 객체로 변환
+        LocalDate date = LocalDate.parse(selectedDate, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+
+        // 어제, 오늘, 내일의 요일을 구함
+        LocalDate yesterday = date.minusDays(1);
+        LocalDate tomorrow = date.plusDays(1);
+
+        // 요일 문자열 배열 초기화
+        String[] Arr = new String[3];
+        Arr[0] = changeDayName(yesterday.getDayOfWeek().toString());
+        Arr[1] = changeDayName(date.getDayOfWeek().toString());
+        Arr[2] = changeDayName(tomorrow.getDayOfWeek().toString());
+        return Arr;
+    }
+
+    // 요일 이름을 변경하는 메소드
+    public static String changeDayName(String dow) {
+        switch (dow) {
+            case "MONDAY":
+                return "MON";
+            case "TUESDAY":
+                return "TUE";
+            case "WEDNESDAY":
+                return "WED";
+            case "THURSDAY":
+                return "THU";
+            case "FRIDAY":
+                return "FRI";
+            case "SATURDAY":
+                return "SAT";
+            case "SUNDAY":
+                return "SUN";
+            default:
+                return "";
+        }
     }
 }

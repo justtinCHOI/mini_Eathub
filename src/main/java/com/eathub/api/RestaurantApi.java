@@ -84,21 +84,32 @@ public class RestaurantApi {
         ));
     }
 
-
-
-
-
+    //SearchResult.html
     //0000부터 2330까지 와 그에 따른 상태 반환 ,  가능 : 0, 예약됨 : 1, 지난 시간 : 2, 오픈하지 않음 : 3
     @PostMapping("/getTimeStatuses/{restaurantSeq}/{selectedDate}")
-    public Map<String, Integer>  timeStatuses(@PathVariable("restaurantSeq") Long restaurant_seq,
-                                       @PathVariable("selectedDate") String selectedDate
+    public Map<String, Integer>  getTimeStatuses(@PathVariable("restaurantSeq") Long restaurant_seq,
+                                              @PathVariable("selectedDate") String selectedDate
     ) {
-
         RestaurantInfo restaurantInfo = restaurantMapper.selectRestaurantInfo(restaurant_seq);
         LocalTime openHour = restaurantInfo.getOpenHour().toLocalTime();
         LocalTime closeHour = restaurantInfo.getCloseHour().toLocalTime();
         LocalTime nextReservationTime =  restaurantService.getNextReservationTime();
-
+        String closedDay = restaurantInfo.getClosedDay();
+        //식당의 닫는날을 리스트형식으로 반환
+        List<String> closedDayList = memberService.convertStringToList(closedDay);
+        //어제 오늘 내일의 요일을 closedDayList 형식으로 반환.
+        String[] selectedLocalDays = RestaurantService.getDayOfWeek(selectedDate);
+        boolean[] isOpenDay = new boolean[3];
+        //기본적으로 다 오픈일.
+        Arrays.fill(isOpenDay, true);
+        for (String c : closedDayList) {
+            for (int i = 0; i < 3; i++) {
+                if(c.equals(selectedLocalDays[i])){
+                    isOpenDay[i] = false;
+                    break;
+                }
+            }
+        }
         Map<String, Integer> timeStatuses = new HashMap<>();
         DateTimeFormatter formatter1 = DateTimeFormatter.ofPattern("HHmm");
         DateTimeFormatter formatter2 = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -108,15 +119,59 @@ public class RestaurantApi {
 
         //if 문의 순서에 따라 우선순위 선택 가능
         do {
-            // 가능 : 0
-            timeStatuses.put(nowTime.format(formatter1), 0);
-            //지난 시간 : 2
-            if(nowTime.isBefore(nextReservationTime) && selectedDate.equals(today.format(formatter2))){
-                timeStatuses.put(nowTime.format(formatter1), 2);
-            }
-            //오픈하지 않음 : 3
-            if(nowTime.isBefore(openHour) || nowTime.isAfter(closeHour)){
-                timeStatuses.put(nowTime.format(formatter1), 3);
+            //오픈일 일 때
+            if(isOpenDay[1]){
+                // 가능 : 0
+                timeStatuses.put(nowTime.format(formatter1), 0);
+
+                //지난 시간 : 2
+                if(nowTime.isBefore(nextReservationTime) && selectedDate.equals(today.format(formatter2))){
+                    timeStatuses.put(nowTime.format(formatter1), 2);
+                }
+                //오픈하지 않음 : 3
+                //24시간으로 처리
+                if(openHour.equals(closeHour)){
+
+                }else if(openHour.isBefore(closeHour)){
+                    //오픈시간이 하루 내에 있다면
+                    if(nowTime.isBefore(openHour) || nowTime.equals(closeHour) || nowTime.isAfter(closeHour)){
+                        timeStatuses.put(nowTime.format(formatter1), 3);
+                    }
+                }else{
+                    //오픈시간이 자정을 포함한다면
+                    if(isOpenDay[0]){
+                        if(nowTime.equals(closeHour) || (nowTime.isAfter(closeHour) && nowTime.isBefore(openHour))){
+                            timeStatuses.put(nowTime.format(formatter1), 3);
+                        }
+                    }else{
+                        if(nowTime.isBefore(openHour)){
+                            timeStatuses.put(nowTime.format(formatter1), 3);
+                        }
+                    }
+                }
+            }else{
+                // 가능 : 0
+                timeStatuses.put(nowTime.format(formatter1), 0);
+
+                //지난 시간 : 2
+                if(nowTime.isBefore(nextReservationTime) && selectedDate.equals(today.format(formatter2))){
+                    timeStatuses.put(nowTime.format(formatter1), 2);
+                }
+
+                //오픈하지 않음 : 3
+                if(openHour.equals(closeHour)){
+                    timeStatuses.put(nowTime.format(formatter1), 3);
+                }else if(openHour.isBefore(closeHour)){
+                    timeStatuses.put(nowTime.format(formatter1), 3);
+                }else{
+                    //자정을 포함하는 식당이고 전날이 오픈일이라면 새벽까지는 연다.
+                    if(isOpenDay[0]){
+                        if(nowTime.equals(closeHour) || nowTime.isAfter(closeHour)){
+                            timeStatuses.put(nowTime.format(formatter1), 3);
+                        }
+                    }
+                }
+
             }
             nowTime = nowTime.plusMinutes(30);
         } while (!nowTime.equals(LocalTime.of(0, 0)));

@@ -237,8 +237,10 @@ function assigningInfo(){
 
     // hidden 태그에서 값 받아오기
     let inputDate = $('input.date').val();
-    let time =  $('input.hour').val();
-    let number = $('input.person').val();
+    let inputTime =  $('input.hour').val();
+    let inputNumber = $('input.person').val();
+    let timeRadio = $('input[type="radio"][name="time"]');
+    let countRadio = $('input[type="radio"][name="count"]');
 
     //캘린더 click
     let dateParts = inputDate.split('-');
@@ -248,6 +250,10 @@ function assigningInfo(){
 
     if(inputDate === ""){
         buildCalendar();
+        timeRadio.each(function() {
+            $(this).addClass('notOpen');
+            $(this).prop("disabled", true);
+        });
     }else {
         this.toDay = new Date(year, month - 1, date);
         buildCalendar();
@@ -262,21 +268,25 @@ function assigningInfo(){
     }
 
     //시간 click
-    let timeRadio = $('input[type="radio"][name="time"]');
-    timeRadio.each(function() {
-        if ($(this).val() === time) {
+    if(inputDate === ""){
+
+    }else{ timeRadio.each(function() {
+        if ($(this).val() === inputTime) {
             $(this).click();
         }
     });
+    }
 
     //인원수 click
-    let countRadio = $('input[type="radio"][name="count"]');
+    if(inputDate === ""){
 
-    countRadio.each(function() {
-        if ($(this).val() === number) {
-            $(this).click();
-        }
-    });
+    }else{
+        countRadio.each(function() {
+            if ($(this).val() === inputNumber) {
+                $(this).click();
+            }
+        });
+    }
 }
 
 
@@ -290,27 +300,42 @@ function fillingInfo() {
     let day = null;
     let time = null;
     let number = null;
+    //modal 값 정보
+    let checkedDate = $('td.choiceDay');
+    let checkedTime = $('.option-timetable label input:checked');
+    let checkedPerson = $('.option-personnel label input:checked');
+    let calYear = $('span#calYear').text();
+    let calMonth = $('span#calMonth').text();
+    let calDate = $('td.choiceDay').text();
+    let calDay = getDayOfWeek($('td.choiceDay').index());
 
-    if ($('td.choiceDay').length !== 0) {
-        year = $('span#calYear').html();
-        month = $('span#calMonth').html();
-        date = $('td.choiceDay').html();
-        day = getDayOfWeek($('td.choiceDay').index());
-        $('span.date').text(year + " . " + month + " . " + date + " (" + day + ")");
-        $('input.date').val(year+"-"+month+"-"+date);
+    if (checkedDate.length !== 0) {
+        $('span.date').text(calYear + " . " + calMonth + " . " + calDate + " (" + calDay + ")");
+        $('input.date').val(calYear+"-"+calMonth+"-"+calDate);
+    }else{
+        //가능하지  않는 요일일 경우
+        $('span.date').text("");
+        $('input.date').val("");
     }
-    if ($('.option-timetable label input:checked').length !== 0) {
-        time = $('.option-timetable label input:checked').parent().children().eq(1).html();
+
+    if (checkedTime.length !== 0) {
+        time = checkedTime.parent().children().eq(1).html();
         $('span.hour').text(time);
-        time = $('.option-timetable label input:checked').val();
+        time = checkedTime.val();
         $('input.hour').val(time);
+    }else{
+        //선택된 날짜값이 없으므로 null 처리
+        $('span.date').text("");
+        $('input.date').val("");
     }
-    if ($('.option-personnel label input:checked').length !== 0) {
-        number = $('.option-personnel label input:checked').parent().children().eq(1).html();
+
+    if (checkedPerson.length !== 0) {
+        number = checkedPerson.parent().children().eq(1).html();
         $('span.person').text(number);
-        number = $('.option-personnel label input:checked').val();
+        number = checkedPerson.val();
         $('input.person').val(number);
-        var requestData = {
+        //session 값 넣기
+        let requestData = {
             date: year+"-"+month+"-"+date, // 입력 필드에서 date 값을 읽어옴
             hour: time, // 입력 필드에서 hour 값을 읽어옴
             person: number // 입력 필드에서 person 값을 읽어옴
@@ -326,6 +351,9 @@ function fillingInfo() {
                 console.log('에러 발생:', error);
             }
         });
+    }else{
+        $('span.person').text("");
+        $('input.person').val("");
     }
 }
 

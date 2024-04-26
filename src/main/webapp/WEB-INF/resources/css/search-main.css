@@ -22,13 +22,20 @@ body{
   max-width: 480px;
   margin: 0 auto;
   background-color: #fff;
-  max-width: 480px;
   width: 100% ;
   position: relative;
 }
 div[rol="presentation"]{
   width: 100vh !important;
 }
+/*.yesterday + span{*/
+/*  color: #ddd !important;*/
+/*  border: 1px solid #ddd !important;*/
+/*}*/
+/*.tomorrow + span{*/
+/*  color: #ddd !important;*/
+/*  border: 1px solid #ddd !important;*/
+/*}*/
 
 
 .wrapper div{
@@ -635,7 +642,6 @@ hr.separator {
   flex-direction: column;
   box-sizing: border-box;
   border-radius: 6px;
-  border: solid 1px #ff3d00;
   overflow: hidden;
   /* width: 76px; */
   text-align: center;
@@ -662,6 +668,22 @@ hr.separator {
   width: 100%;
 }
 
+/*time radio 중 시간이 지난 input*/
+.notOpen + span {
+  border: 1px solid #ddd !important;
+  background: #ddd !important;
+  color: #ddd !important;
+}
+.outdated + span {
+  border: 1px solid #ddd !important;
+  background: #ddd !important;
+  color: #ddd !important;
+}
+.booked + span {
+  border: 1px solid #ddd !important;
+  background: #ddd !important;
+  color: #ddd !important;
+}
 /* item info / detail / 타임 없음 */
 .timetable-list-item.disabled {
   border-color: #f1f1f1;

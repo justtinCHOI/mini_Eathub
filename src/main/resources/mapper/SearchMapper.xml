@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.eathub.mapper.SearchMapper">
+
+    <select id="selectRestaurantSearchListPage" resultType="searchResultDTO">
+        SELECT restaurant_seq, member_seq, category_seq, restaurant_name, tag, location, description, openHour, closeHour, rating, review_total, zzim_total
+        FROM restaurant_info
+        WHERE status = 'ACCESS'
+        <if test="categorySeq != 0 and  categorySeq != null">
+            AND category_seq = #{categorySeq}
+        </if>
+        ORDER BY
+        <choose>
+            <when test="sortNum == 0">
+                zzim_total DESC
+            </when>
+            <when test="sortNum == 1">
+                rating DESC
+            </when>
+            <otherwise>
+                review_total DESC
+            </otherwise>
+        </choose>
+        , restaurant_seq
+        LIMIT #{page}, 5
+    </select>
+
+    <select id="SearchResultNum" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM restaurant_info WHERE status = 'ACCESS'
+        <if test="categorySeq != 0 and categorySeq != null">
+            AND category_seq = #{categorySeq}
+        </if>
+    </select>
+
+
+
+</mapper>

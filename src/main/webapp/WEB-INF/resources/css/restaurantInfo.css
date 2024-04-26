@@ -1610,8 +1610,8 @@ body {
 
 /*time radio 중 시간이 지난 input*/
 .notOpen + span {
-    border: 1px solid blue !important;
-    color: blue !important;
+    border: 1px solid #ddd !important;
+    color: #ddd !important;
 }
 .outdated + span {
     border: 1px solid #ddd !important;

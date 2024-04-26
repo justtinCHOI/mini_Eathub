@@ -18,6 +18,7 @@
                 <typeAlias type="com.eathub.dto.RestaurantJoinDTO" alias="restaurantJoinDTO"/>
                 <typeAlias type="com.eathub.dto.ReservationJoinDTO" alias="reservationJoinDTO"/>
                 <typeAlias type="com.eathub.dto.ReservationDTO" alias="reservationDTO"/>
+                <typeAlias type="com.eathub.dto.SearchResultDTO" alias="searchResultDTO"/>
 
         </typeAliases>
 </configuration>

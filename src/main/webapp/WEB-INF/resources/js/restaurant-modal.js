@@ -250,8 +250,8 @@ function assigningInfo(){
 
     // hidden 태그에서 값 받아오기
     let inputDate = $('input.date').val();
-    let time =  $('input.hour').val();
-    let number = $('input.person').val();
+    let inputTime =  $('input.hour').val();
+    let inputNumber = $('input.person').val();
     let timeRadio = $('input[type="radio"][name="time"]');
     let countRadio = $('input[type="radio"][name="count"]');
 
@@ -263,6 +263,10 @@ function assigningInfo(){
 
     if(inputDate === ""){
         buildCalendar();
+        timeRadio.each(function() {
+            $(this).addClass('notOpen');
+            $(this).prop("disabled", true);
+        });
     }else{
         this.toDay = new Date(year, month - 1, date);
         buildCalendar();
@@ -276,18 +280,25 @@ function assigningInfo(){
     }
 
     //시간 click
-    timeRadio.each(function() {
-        if ($(this).val() === time) {
+    if(inputDate === ""){
+
+    }else{ timeRadio.each(function() {
+        if ($(this).val() === inputTime) {
             $(this).click();
         }
     });
+    }
 
     //인원수 click
-    countRadio.each(function() {
-        if ($(this).val() === number) {
-            $(this).click();
-        }
-    });
+    if(inputDate === ""){
+
+    }else{
+        countRadio.each(function() {
+            if ($(this).val() === inputNumber) {
+                $(this).click();
+            }
+        });
+    }
 }
 
 
@@ -308,18 +319,32 @@ function fillingInfo(){
     if (checkedDate.length !== 0) {
         $('span.date').text(calYear + " . " + calMonth + " . " + calDate + " (" + calDay + ")");
         $('input.date').val(calYear+"-"+calMonth+"-"+calDate);
+    } else{
+        //가능하지  않는 요일일 경우
+        $('span.date').text("");
+        $('input.date').val("");
     }
+
     if (checkedTime.length !== 0) {
         time = checkedTime.parent().children().eq(1).html();
         $('span.hour').text(time);
         time = checkedTime.val();
         $('input.hour').val(time);
+    }else{
+        //선택된 날짜값이 없으므로 null 처리
+        $('span.hour').text("");
+        $('input.hour').val("");
     }
+
     if (checkedPerson.length !== 0) {
         number = checkedPerson.parent().children().eq(1).html();
         $('span.person').text(number);
         number = checkedPerson.val();
         $('input.person').val(number);
+    }
+    else{
+        $('span.person').text("");
+        $('input.person').val("");
     }
 }
 

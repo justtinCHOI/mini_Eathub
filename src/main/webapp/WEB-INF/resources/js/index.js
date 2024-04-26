@@ -78,7 +78,7 @@ document.addEventListener("DOMContentLoaded", function() {
     listItems.forEach(function(item) {
         item.addEventListener('click', function() {
         var categorySeq = this.getAttribute('data-category-seq');
-        window.location.href = '/search/category/' + categorySeq;
+        window.location.href = '/search/?categorySeq=' + categorySeq;
         });
     });
 });
